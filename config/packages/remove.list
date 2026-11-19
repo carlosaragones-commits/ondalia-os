@@ -1,0 +1,21 @@
+# Paquetes de Kubuntu que Ondalia no incluye.
+# Solo se quitan si están instalados. Antes de quitarlos, build marca todo lo
+# demás como instalado a mano para que no se lleven por delante otros paquetes.
+
+# Juegos de demostración
+kmahjongg
+kmines
+kpat
+ksudoku
+
+# Apps duplicadas: Ondalia usa VLC para vídeo y música
+elisa
+haruna
+dragonplayer
+
+# Apps poco útiles para quien empieza
+konversation
+ktorrent
+neochat
+krdc
+krfb

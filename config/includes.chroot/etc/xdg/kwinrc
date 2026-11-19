@@ -1,0 +1,11 @@
+[Plugins]
+blurEnabled=true
+contrastEnabled=true
+wobblywindowsEnabled=false
+
+[Effect-blur]
+BlurStrength=6
+NoiseStrength=2
+
+[Windows]
+BorderlessMaximizedWindows=false

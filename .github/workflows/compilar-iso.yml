@@ -1,0 +1,74 @@
+name: Compilar ISO de Ondalia
+
+# Se lanza a mano desde la pestaña "Actions" de GitHub, o al publicar una
+# etiqueta de versión (por ejemplo v0.1).
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: compilar-iso
+  cancel-in-progress: true
+
+jobs:
+  iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Descargar el proyecto
+        uses: actions/checkout@v4
+
+      - name: Liberar espacio en disco
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h / /mnt
+
+      - name: Instalar herramientas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget xorriso squashfs-tools rsync librsvg2-bin
+
+      - name: Compilar la ISO
+        run: |
+          sudo mkdir -p /mnt/ondalia
+          sudo WORK_DIR=/mnt/ondalia/work OUT_DIR="$GITHUB_WORKSPACE/out" ./build.sh
+          sudo chown -R "$USER" out
+
+      - name: Subir la ISO para descargarla
+        uses: actions/upload-artifact@v4
+        with:
+          name: ondalia-iso
+          path: out/*
+          compression-level: 0
+          retention-days: 14
+
+      # GitHub no admite archivos de más de 2 GB en una "release", así que la
+      # ISO se publica partida en trozos; INSTRUCCIONES.txt explica cómo unirlos.
+      - name: Publicar versión (solo con etiquetas v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd out
+          ISO=$(ls ./*.iso | head -n1)
+          ISO=${ISO#./}
+          split -b 1900M -d -a 2 "$ISO" "$ISO.parte"
+          cat > INSTRUCCIONES.txt <<EOF
+          Descarga todas las partes y únelas:
+
+            Linux / macOS:  cat $ISO.parte* > $ISO
+            Windows (CMD):  copy /b $ISO.parte00+$ISO.parte01+$ISO.parte02 $ISO
+
+          Después comprueba la suma con el archivo $ISO.sha256.
+          EOF
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Ondalia OS $GITHUB_REF_NAME" \
+            --notes "Versión de prueba de Ondalia OS. Lee INSTRUCCIONES.txt para unir la ISO." \
+            --prerelease \
+            ./*.parte* ./*.sha256 INSTRUCCIONES.txt

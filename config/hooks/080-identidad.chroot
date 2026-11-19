@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# Identidad visual de Ondalia: aspecto de Plasma, arranque, inicio de sesión
+# e instalador. Debe ir al final porque regenera el initramfs.
+source /tmp/ondalia/hooks/lib.sh
+
+install_available plymouth plymouth-label fonts-inter
+
+# --- Aspecto de Plasma ---
+# Completa los paquetes de Ondalia con las piezas de Breeze que no redefinimos
+# (pantalla de bloqueo, splash de inicio...). Solo copia lo que falta.
+LNF=/usr/share/plasma/look-and-feel
+# El aspecto oscuro usa la misma distribución de escritorio que el claro.
+install -D -m 0644 "$LNF/org.ondalia.desktop/contents/layouts/org.kde.plasma.desktop-layout.js" \
+    "$LNF/org.ondalia.oscuro.desktop/contents/layouts/org.kde.plasma.desktop-layout.js"
+for pair in "org.kde.breeze.desktop:org.ondalia.desktop" "org.kde.breezedark.desktop:org.ondalia.oscuro.desktop"; do
+    SRC="$LNF/${pair%%:*}/contents"
+    DST="$LNF/${pair##*:}/contents"
+    if [[ -d $SRC ]]; then
+        while IFS= read -r -d '' f; do
+            [[ -e $DST/$f ]] || install -D -m 0644 "$SRC/$f" "$DST/$f"
+        done < <(cd "$SRC" && find . -type f -printf '%P\0')
+    else
+        warn "No se encontró ${pair%%:*}; ${pair##*:} queda incompleto"
+    fi
+done
+
+# Archivos de Ondalia que sustituyen a otros de Kubuntu: se "desvían" para que
+# una actualización de Kubuntu no los sobrescriba.
+DIVERT_FILES=(/etc/xdg/kcm-about-distrorc)
+for f in "${DIVERT_FILES[@]}"; do
+    if dpkg -S "$f" >/dev/null 2>&1; then
+        tmp=$(mktemp)
+        cp "$f" "$tmp"
+        dpkg-divert --package ondalia-os --add --rename --divert "$f.kubuntu" "$f"
+        install -m 0644 "$tmp" "$f"
+        rm -f "$tmp"
+    fi
+done
+
+# --- Pantalla de arranque (Plymouth) ---
+log "Tema de arranque"
+THEME=/usr/share/plymouth/themes/ondalia/ondalia.plymouth
+update-alternatives --install /usr/share/plymouth/themes/default.plymouth default.plymouth "$THEME" 200
+update-alternatives --set default.plymouth "$THEME"
+
+# --- Pantalla de inicio de sesión (SDDM, tema Breeze con el fondo de Ondalia) ---
+if [[ -d /usr/share/sddm/themes/breeze ]]; then
+    cat >/usr/share/sddm/themes/breeze/theme.conf.user <<EOF
+[General]
+background=/usr/share/wallpapers/Ondalia/contents/images/3840x2160.png
+type=image
+EOF
+fi
+
+# --- Instalador (Calamares) ---
+BRANDING=/etc/calamares/branding
+if [[ -d $BRANDING/kubuntu ]]; then
+    log "Marca de Ondalia en el instalador"
+    rm -rf "$BRANDING/ondalia"
+    cp -r "$BRANDING/kubuntu" "$BRANDING/ondalia"
+    cp /usr/share/pixmaps/ondalia-logo.png "$BRANDING/ondalia/ondalia-logo.png"
+    DESC="$BRANDING/ondalia/branding.desc"
+    sed -i -E \
+        -e 's/^componentName:.*/componentName: ondalia/' \
+        -e "s/^([[:space:]]+productName:).*/\1 \"$DISTRO_NAME\"/" \
+        -e "s/^([[:space:]]+shortProductName:).*/\1 \"Ondalia\"/" \
+        -e "s/^([[:space:]]+version:).*/\1 \"$VERSION\"/" \
+        -e "s/^([[:space:]]+shortVersion:).*/\1 \"$VERSION\"/" \
+        -e "s/^([[:space:]]+versionedName:).*/\1 \"$DISTRO_NAME $VERSION\"/" \
+        -e "s/^([[:space:]]+shortVersionedName:).*/\1 \"Ondalia $VERSION\"/" \
+        -e "s/^([[:space:]]+bootloaderEntryName:).*/\1 \"Ondalia\"/" \
+        -e 's/^([[:space:]]+productLogo:).*/\1 "ondalia-logo.png"/' \
+        -e 's/^([[:space:]]+productIcon:).*/\1 "ondalia-logo.png"/' \
+        "$DESC"
+    sed -i -E 's/^branding:.*/branding: ondalia/' /etc/calamares/settings.conf
+else
+    warn "No se encontró la marca de Kubuntu en Calamares; el instalador conserva su aspecto"
+fi
+
+# Quita la página "selección de paquetes" de Kubuntu: instala apps con Snap,
+# su instalación mínima borra LibreOffice y Okular, y su opción de actualizar
+# usa --force-confnew, que pisaría los ajustes de Ondalia. Ondalia ya trae
+# códecs y apps, y se actualiza después de instalar.
+if [[ -f /etc/calamares/settings.conf ]]; then
+    sed -i -E \
+        -e '/^[[:space:]]*-[[:space:]]*pkgselect[[:space:]]*$/d' \
+        -e '/contextualprocess@pkgselect_action/d' \
+        -e '/contextualprocess@pkgselect_snap_action/d' \
+        /etc/calamares/settings.conf
+fi
+
+# Accesos directos del instalador en la sesión en vivo.
+{ grep -l 'Kubuntu' /usr/share/applications/*calamares*.desktop /etc/skel/Desktop/*.desktop 2>/dev/null || true; } |
+    xargs -r sed -i "s/Kubuntu/$DISTRO_NAME/g"
+
+# --- Regenerar el initramfs con el nuevo tema de arranque ---
+log "Regenerando initramfs"
+update-initramfs -u -k all

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Administración electrónica española: DNIe, lectores de tarjetas y AutoFirma.
+# El módulo del DNIe se carga en Firefox desde /etc/firefox/policies/policies.json.
+source /tmp/ondalia/hooks/lib.sh
+
+install_available pcscd libccid opensc opensc-pkcs11 libnss3-tools default-jre
+systemctl enable pcscd.socket 2>/dev/null || true
+
+# AutoFirma: paquete oficial del Gobierno de España para Debian y derivados.
+AUTOFIRMA_URLS=(
+    "https://estaticos.redsara.es/comunes/autofirma/currentversion/AutoFirma_Linux_Debian.zip"
+    "https://estaticos.redsara.es/comunes/autofirma/currentversion/Autofirma_Linux_Debian.zip"
+)
+TMP=$(mktemp -d)
+ok=0
+for url in "${AUTOFIRMA_URLS[@]}"; do
+    log "Descargando AutoFirma: $url"
+    if wget -q -O "$TMP/autofirma.zip" "$url"; then
+        ok=1
+        break
+    fi
+done
+
+if ((ok)); then
+    unzip -q -o "$TMP/autofirma.zip" -d "$TMP"
+    DEB=$(find "$TMP" -iname 'autofirma*.deb' | head -n1)
+    if [[ -n $DEB ]]; then
+        apt_get install "$DEB"
+        log "AutoFirma instalada"
+    else
+        ok=0
+        warn "El ZIP de AutoFirma no contiene ningún .deb"
+    fi
+fi
+rm -rf "$TMP"
+
+if ((!ok)); then
+    if [[ ${AUTOFIRMA_REQUIRED:-0} == 1 ]]; then
+        warn "No se pudo instalar AutoFirma y AUTOFIRMA_REQUIRED=1"
+        exit 1
+    fi
+    warn "AutoFirma NO se ha incluido en esta ISO. Revisa la URL de descarga."
+fi

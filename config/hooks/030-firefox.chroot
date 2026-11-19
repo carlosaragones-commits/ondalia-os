@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Firefox en paquete .deb desde el repositorio oficial de Mozilla (sin Snap).
+source /tmp/ondalia/hooks/lib.sh
+
+KEY=/etc/apt/keyrings/packages.mozilla.org.asc
+EXPECTED_FPR=35BAA0B33E9EB396F59CA838C0BA5CE6DC6315A3
+
+log "Añadiendo el repositorio de Mozilla"
+install -d -m 0755 /etc/apt/keyrings
+wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O "$KEY"
+
+FPR=$(gpg -n -q --import --import-options import-show "$KEY" 2>/dev/null |
+    awk '/pub/{getline; gsub(/^ +| +$/, ""); print; exit}') || true
+[[ $FPR == "$EXPECTED_FPR" ]] || { warn "Huella de la clave de Mozilla inesperada: $FPR"; exit 1; }
+
+cat >/etc/apt/sources.list.d/mozilla.sources <<EOF
+Types: deb
+URIs: https://packages.mozilla.org/apt
+Suites: mozilla
+Components: main
+Signed-By: $KEY
+EOF
+
+# La prioridad 1000 evita que vuelva el paquete de transición a Snap de Ubuntu.
+cat >/etc/apt/preferences.d/mozilla.pref <<EOF
+Package: *
+Pin: origin packages.mozilla.org
+Pin-Priority: 1000
+EOF
+
+apt_get update
+apt_get install firefox firefox-l10n-es-es

@@ -1,0 +1,4 @@
+# Ondalia OS no usa Snap. Este archivo impide que snapd se instale.
+Package: snapd
+Pin: release a=*
+Pin-Priority: -10

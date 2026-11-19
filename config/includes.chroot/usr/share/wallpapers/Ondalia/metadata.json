@@ -1,0 +1,12 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Ondalia OS"
+            }
+        ],
+        "Id": "Ondalia",
+        "License": "CC-BY-SA-4.0",
+        "Name": "Ondalia"
+    }
+}

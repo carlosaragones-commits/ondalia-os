@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Ondalia OS</title>
+  <defs>
+    <linearGradient id="ola" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#0097A7"/>
+      <stop offset="1" stop-color="#4DD0E1"/>
+    </linearGradient>
+    <linearGradient id="aro" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00BCD4"/>
+      <stop offset="1" stop-color="#002F6C"/>
+    </linearGradient>
+    <clipPath id="dentro"><circle cx="128" cy="128" r="94"/></clipPath>
+  </defs>
+  <circle cx="128" cy="128" r="104" fill="none" stroke="url(#aro)" stroke-width="16"/>
+  <g clip-path="url(#dentro)">
+    <path fill="url(#ola)" d="M20 170 C60 166 84 128 116 102 C146 78 188 74 210 100 C214 105 216 110 216 114 C200 98 172 98 156 116 C142 132 148 154 172 158 C188 161 204 156 220 148 L236 236 L20 236 Z"/>
+    <path fill="#4DB6AC" opacity="0.85" d="M20 196 C64 196 92 178 124 172 C160 166 196 180 236 170 L236 236 L20 236 Z"/>
+  </g>
+</svg>

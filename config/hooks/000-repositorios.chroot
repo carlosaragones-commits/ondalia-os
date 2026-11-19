@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Repositorios completos de Ubuntu (main, restricted, universe, multiverse)
+# y actualización de todo el sistema base.
+source /tmp/ondalia/hooks/lib.sh
+
+# shellcheck source=/dev/null
+. /etc/os-release
+SUITE="${VERSION_CODENAME:?No se pudo leer el nombre de la versión de Ubuntu}"
+
+log "Configurando repositorios de Ubuntu $SUITE"
+rm -f /etc/apt/sources.list
+cat >/etc/apt/sources.list.d/ubuntu.sources <<EOF
+Types: deb
+URIs: http://archive.ubuntu.com/ubuntu/
+Suites: $SUITE $SUITE-updates $SUITE-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: http://security.ubuntu.com/ubuntu/
+Suites: $SUITE-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+EOF
+
+apt_get update
+log "Actualizando el sistema base"
+apt_get full-upgrade
+install_available wget ca-certificates gnupg unzip

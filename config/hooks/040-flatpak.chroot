@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Flatpak y Flathub en la tienda (Discover) desde el primer arranque.
+source /tmp/ondalia/hooks/lib.sh
+
+install_available flatpak plasma-discover plasma-discover-backend-flatpak
+
+log "Añadiendo Flathub"
+flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo

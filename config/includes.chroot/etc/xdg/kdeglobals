@@ -1,0 +1,19 @@
+[General]
+ColorScheme=OndaliaClaro
+BrowserApplication=firefox.desktop
+font=Inter,10,-1,5,50,0,0,0,0,0
+menuFont=Inter,10,-1,5,50,0,0,0,0,0
+toolBarFont=Inter,9,-1,5,50,0,0,0,0,0
+smallestReadableFont=Inter,8,-1,5,50,0,0,0,0,0
+fixed=JetBrains Mono,10,-1,5,50,0,0,0,0,0
+
+[KDE]
+LookAndFeelPackage=org.ondalia.desktop
+AutomaticLookAndFeel=false
+DefaultLightLookAndFeel=org.ondalia.desktop
+DefaultDarkLookAndFeel=org.ondalia.oscuro.desktop
+AnimationDurationFactor=0.7
+SingleClick=false
+
+[Icons]
+Theme=breeze

@@ -1,0 +1,13 @@
+{
+  "policies": {
+    "DisableTelemetry": true,
+    "DisableFirefoxStudies": true,
+    "DontCheckDefaultBrowser": true,
+    "RequestedLocales": ["es-ES"],
+    "SecurityDevices": {
+      "Add": {
+        "DNIe y tarjetas (OpenSC)": "/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so"
+      }
+    }
+  }
+}

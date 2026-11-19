@@ -1,0 +1,17 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Ondalia OS"
+            }
+        ],
+        "Category": "",
+        "Description": "Aspecto por defecto de Ondalia OS: barra fina arriba y dock flotante abajo",
+        "Id": "org.ondalia.desktop",
+        "License": "GPL-3.0-or-later",
+        "Name": "Ondalia",
+        "Version": "0.1"
+    },
+    "X-Plasma-APIVersion": "2"
+}

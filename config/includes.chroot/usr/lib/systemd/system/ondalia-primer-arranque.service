@@ -1,0 +1,11 @@
+[Unit]
+Description=Configuración inicial de Ondalia OS
+ConditionPathExists=!/var/lib/ondalia/primer-arranque.hecho
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/ondalia/primer-arranque.sh
+
+[Install]
+WantedBy=multi-user.target

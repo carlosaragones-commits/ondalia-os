@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Español de España por defecto: idioma, teclado, zona horaria y diccionarios.
+source /tmp/ondalia/hooks/lib.sh
+
+install_available \
+    language-pack-es language-pack-kde-es \
+    hunspell-es hyphen-es mythes-es \
+    libreoffice-l10n-es libreoffice-help-es
+
+log "Idioma $DEFAULT_LOCALE"
+sed -i "s/^# *\(${DEFAULT_LOCALE//./\\.}\)/\1/" /etc/locale.gen 2>/dev/null || true
+locale-gen "$DEFAULT_LOCALE"
+update-locale LANG="$DEFAULT_LOCALE"
+
+log "Teclado '$DEFAULT_KEYMAP'"
+cat >/etc/default/keyboard <<EOF
+XKBMODEL="pc105"
+XKBLAYOUT="$DEFAULT_KEYMAP"
+XKBVARIANT=""
+XKBOPTIONS=""
+BACKSPACE="guess"
+EOF
+
+log "Zona horaria $DEFAULT_TIMEZONE"
+ln -sf "/usr/share/zoneinfo/$DEFAULT_TIMEZONE" /etc/localtime
+echo "$DEFAULT_TIMEZONE" >/etc/timezone
+
+# El instalador Calamares propone España por defecto.
+for f in /etc/calamares/modules/locale.conf /usr/share/calamares/modules/locale.conf; do
+    [[ -f $f ]] || continue
+    sed -i -E \
+        -e "s|^([[:space:]]*region:).*|\1 \"${DEFAULT_TIMEZONE%%/*}\"|" \
+        -e "s|^([[:space:]]*zone:).*|\1 \"${DEFAULT_TIMEZONE#*/}\"|" \
+        "$f"
+done

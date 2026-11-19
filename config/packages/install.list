@@ -1,0 +1,53 @@
+# Paquetes que se añaden a la base de Kubuntu.
+# Una línea por paquete. Los que no existan en los repositorios se omiten con un aviso.
+
+# --- Aplicaciones (una por tarea) ---
+vlc
+kwrite
+ark
+kcalc
+okular
+gwenview
+kde-spectacle
+kdeconnect
+skanpage
+libreoffice-writer
+libreoffice-calc
+libreoffice-impress
+libreoffice-kf6
+
+# --- Fuentes compatibles con documentos de Office y tipografía de la interfaz ---
+fonts-crosextra-carlito
+fonts-crosextra-caladea
+fonts-liberation
+fonts-inter
+fonts-jetbrains-mono
+fonts-noto-color-emoji
+
+# --- Códecs y aceleración de vídeo ---
+libavcodec-extra
+gstreamer1.0-libav
+gstreamer1.0-plugins-good
+gstreamer1.0-plugins-bad
+gstreamer1.0-plugins-ugly
+gstreamer1.0-vaapi
+intel-media-va-driver-non-free
+mesa-va-drivers
+ffmpeg
+
+# --- Archivos comprimidos ---
+7zip
+unrar
+
+# --- Impresoras y escáneres ---
+cups
+printer-driver-all
+sane-airscan
+ipp-usb
+
+# --- Mandos de juego ---
+steam-devices
+
+# --- Rendimiento ---
+zram-tools
+power-profiles-daemon

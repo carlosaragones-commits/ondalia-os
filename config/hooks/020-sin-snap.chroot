@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Quita Snap por completo. Las apps de terceros llegan por Flatpak.
+# El archivo /etc/apt/preferences.d/ondalia-sin-snap.pref impide que vuelva.
+source /tmp/ondalia/hooks/lib.sh
+
+# En Ubuntu, firefox y thunderbird son paquetes de transición que instalan el snap.
+purge_installed firefox thunderbird plasma-discover-backend-snap snapd
+
+log "Borrando restos de Snap"
+rm -rf /snap /var/snap /var/lib/snapd /var/cache/snapd /root/snap /etc/skel/snap

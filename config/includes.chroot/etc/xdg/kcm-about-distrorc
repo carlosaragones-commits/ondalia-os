@@ -1,0 +1,7 @@
+[General]
+Name=Ondalia OS
+LogoPath=/usr/share/pixmaps/ondalia-logo.svg
+UseOSReleaseVersion=false
+Version=0.1 (basada en Kubuntu 26.04 LTS)
+Variant=Fluidez. Ligereza. Elegancia.
+Website=

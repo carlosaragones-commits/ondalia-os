@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Ondalia
+Description=Pantalla de arranque de Ondalia OS: la ola sobre azul profundo
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/ondalia
+ScriptFile=/usr/share/plymouth/themes/ondalia/ondalia.script

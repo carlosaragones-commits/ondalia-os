@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Ondalia OS (claro sobre fondo oscuro)</title>
+  <defs>
+    <clipPath id="dentro"><circle cx="128" cy="128" r="94"/></clipPath>
+  </defs>
+  <circle cx="128" cy="128" r="104" fill="none" stroke="#E6F7FA" stroke-width="16"/>
+  <g clip-path="url(#dentro)">
+    <path fill="#4DD0E1" d="M20 170 C60 166 84 128 116 102 C146 78 188 74 210 100 C214 105 216 110 216 114 C200 98 172 98 156 116 C142 132 148 154 172 158 C188 161 204 156 220 148 L236 236 L20 236 Z"/>
+    <path fill="#E6F7FA" opacity="0.9" d="M20 196 C64 196 92 178 124 172 C160 166 196 180 236 170 L236 236 L20 236 Z"/>
+  </g>
+</svg>

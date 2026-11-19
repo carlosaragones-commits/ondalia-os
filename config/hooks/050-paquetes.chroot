@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Añade y quita paquetes según config/packages/install.list y remove.list.
+source /tmp/ondalia/hooks/lib.sh
+
+LISTS=/tmp/ondalia/packages
+
+# Antes de quitar nada, todo lo instalado pasa a "instalado a mano".
+# Así, quitar un paquete recomendado por kubuntu-desktop no arrastra al resto.
+log "Protegiendo los paquetes instalados"
+apt-mark showauto | xargs -r apt-mark manual >/dev/null
+
+mapfile -t TO_INSTALL < <(read_list "$LISTS/install.list")
+install_available "${TO_INSTALL[@]}"
+
+mapfile -t TO_REMOVE < <(read_list "$LISTS/remove.list")
+purge_installed "${TO_REMOVE[@]}"
+
+# Memoria comprimida (zram): la mitad de la RAM, comprimida con zstd.
+if [[ -f /etc/default/zramswap ]]; then
+    sed -i -E -e 's/^#?ALGO=.*/ALGO=zstd/' -e 's/^#?PERCENT=.*/PERCENT=50/' /etc/default/zramswap
+fi

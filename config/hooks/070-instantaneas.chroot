@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Instantáneas del sistema para poder volver atrás tras una actualización.
+# - Calamares propone Btrfs por defecto al instalar.
+# - En el primer arranque del sistema instalado, ondalia-primer-arranque.service
+#   crea la configuración de Snapper.
+# - El paquete snapper de Debian/Ubuntu trae un hook de APT que hace una
+#   instantánea antes y después de cada instalación o actualización.
+source /tmp/ondalia/hooks/lib.sh
+
+install_available btrfs-progs snapper
+
+for f in /etc/calamares/modules/partition.conf /usr/share/calamares/modules/partition.conf; do
+    [[ -f $f ]] || continue
+    log "Btrfs por defecto en el instalador ($f)"
+    if grep -q '^defaultFileSystemType:' "$f"; then
+        sed -i 's/^defaultFileSystemType:.*/defaultFileSystemType: "btrfs"/' "$f"
+    else
+        echo 'defaultFileSystemType: "btrfs"' >>"$f"
+    fi
+done
+
+chmod 0755 /usr/lib/ondalia/primer-arranque.sh
+systemctl enable ondalia-primer-arranque.service
