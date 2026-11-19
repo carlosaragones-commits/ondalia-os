@@ -235,7 +235,7 @@ build_iso() {
     # "replay" reutiliza el arranque UEFI y BIOS de la ISO original de Kubuntu.
     xorriso -indev "$BASE_ISO" -outdev "$OUT_ISO" \
         -volid "$ISO_LABEL" \
-        -iso_level 3 \
+        -compliance iso_9660_level=3 \
         -map "$ISO_DIR" / \
         -boot_image any replay \
         -padding included

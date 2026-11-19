@@ -7,15 +7,29 @@ install_available pcscd libccid opensc opensc-pkcs11 libnss3-tools default-jre
 systemctl enable pcscd.socket 2>/dev/null || true
 
 # AutoFirma: paquete oficial del Gobierno de España para Debian y derivados.
-AUTOFIRMA_URLS=(
-    "https://estaticos.redsara.es/comunes/autofirma/currentversion/AutoFirma_Linux_Debian.zip"
-    "https://estaticos.redsara.es/comunes/autofirma/currentversion/Autofirma_Linux_Debian.zip"
-)
+# El enlace cambia con cada versión, así que primero se busca en la página
+# oficial de descargas y, si no aparece, se prueban las direcciones conocidas.
+SITE=https://firmaelectronica.gob.es
 TMP=$(mktemp -d)
+AUTOFIRMA_URLS=()
+for page in "$SITE/ciudadanos/descargas" "$SITE/Home/Descargas.html"; do
+    if wget -nv -O "$TMP/descargas.html" "$page"; then
+        while IFS= read -r href; do
+            [[ $href == http* ]] || href="$SITE$href"
+            AUTOFIRMA_URLS+=("$href")
+        done < <(grep -oiE 'href="[^"]*linux_debian[^"]*\.zip"' "$TMP/descargas.html" |
+            sed -E 's/^href="//I; s/"$//' | sort -u)
+    fi
+done
+AUTOFIRMA_URLS+=(
+    "https://estaticos.redsara.es/comunes/autofirma/currentversion/Autofirma_Linux_Debian.zip"
+    "https://estaticos.redsara.es/comunes/autofirma/currentversion/AutoFirma_Linux_Debian.zip"
+)
+
 ok=0
 for url in "${AUTOFIRMA_URLS[@]}"; do
     log "Descargando AutoFirma: $url"
-    if wget -q -O "$TMP/autofirma.zip" "$url"; then
+    if wget -nv -O "$TMP/autofirma.zip" "$url" && unzip -tq "$TMP/autofirma.zip" >/dev/null; then
         ok=1
         break
     fi
