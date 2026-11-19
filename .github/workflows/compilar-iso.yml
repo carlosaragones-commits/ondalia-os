@@ -4,6 +4,11 @@ name: Compilar ISO de Ondalia
 # etiqueta de versión (por ejemplo v0.1).
 on:
   workflow_dispatch:
+    inputs:
+      prueba_rapida:
+        description: "Prueba rápida: solo regenera la ISO de Kubuntu sin personalizar (unos 10 min)"
+        type: boolean
+        default: false
   push:
     tags: ["v*"]
 
@@ -37,7 +42,8 @@ jobs:
       - name: Compilar la ISO
         run: |
           sudo mkdir -p /mnt/ondalia
-          sudo WORK_DIR=/mnt/ondalia/work OUT_DIR="$GITHUB_WORKSPACE/out" ./build.sh
+          sudo WORK_DIR=/mnt/ondalia/work OUT_DIR="$GITHUB_WORKSPACE/out" \
+            FAST_TEST="${{ inputs.prueba_rapida && '1' || '0' }}" ./build.sh
           sudo chown -R "$USER" out
 
       - name: Subir la ISO para descargarla

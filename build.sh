@@ -9,6 +9,7 @@
 #      arranque UEFI/BIOS de la original.
 #
 # Uso:  sudo ./build.sh
+#       sudo FAST_TEST=1 ./build.sh   (solo regenera la ISO, sin personalizar)
 # Necesita: wget xorriso squashfs-tools rsync librsvg2-bin y unos 25 GB libres.
 
 set -Eeuo pipefail
@@ -90,6 +91,10 @@ extract_base() {
     [[ -f $squashfs ]] ||
         die "La ISO no trae casper/filesystem.squashfs. Contenido de casper/: $(ls "$ISO_DIR/casper" | tr '\n' ' ')"
 
+    if [[ ${FAST_TEST:-0} == 1 ]]; then
+        log "Prueba rápida: se conserva el sistema de Kubuntu sin modificar"
+        return
+    fi
     log "Extrayendo el sistema de archivos (puede tardar varios minutos)"
     unsquashfs -q -f -d "$CHROOT" "$squashfs"
     rm -f "$squashfs"   # se regenera al final; así se ahorran unos 4 GB
@@ -232,13 +237,18 @@ build_iso() {
 
     OUT_ISO="$OUT_DIR/${DISTRO_ID}-${VERSION}-amd64.iso"
     rm -f "$OUT_ISO"
-    # "replay" reutiliza el arranque UEFI y BIOS de la ISO original de Kubuntu.
-    xorriso -indev "$BASE_ISO" -outdev "$OUT_ISO" \
-        -volid "$ISO_LABEL" \
-        -compliance iso_9660_level=3 \
-        -map "$ISO_DIR" / \
-        -boot_image any replay \
-        -padding included
+
+    # Se reutiliza exactamente el arranque UEFI y BIOS de la ISO de Kubuntu:
+    # xorriso describe cómo se creó (opciones de mkisofs) y se repite con
+    # nuestro contenido. La partición EFI se lee de la ISO original.
+    local boot_args
+    boot_args=$(xorriso -indev "$BASE_ISO" -report_el_torito as_mkisofs 2>/dev/null |
+        grep -vE '^-V ' | tr '\n' ' ')
+    [[ -n $boot_args ]] || die "No se pudo leer la configuración de arranque de la ISO base"
+    log "Opciones de arranque heredadas: $boot_args"
+
+    eval "xorriso -as mkisofs -r -iso-level 3 $boot_args" \
+        '-V "$ISO_LABEL" -o "$OUT_ISO" "$ISO_DIR"'
 
     (cd "$OUT_DIR" && sha256sum "$(basename "$OUT_ISO")" >"$(basename "$OUT_ISO").sha256")
     log "ISO lista: $OUT_ISO ($(du -h "$OUT_ISO" | cut -f1))"
@@ -248,6 +258,11 @@ main() {
     check_requirements
     download_base
     extract_base
+    if [[ ${FAST_TEST:-0} == 1 ]]; then
+        # Solo comprueba que la ISO se puede regenerar y arrancar (unos 5 min).
+        build_iso
+        return
+    fi
     render_branding
     prepare_chroot
     customize
