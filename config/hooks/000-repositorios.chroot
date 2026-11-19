@@ -9,6 +9,8 @@ SUITE="${VERSION_CODENAME:?No se pudo leer el nombre de la versión de Ubuntu}"
 
 log "Configurando repositorios de Ubuntu $SUITE"
 rm -f /etc/apt/sources.list
+# La ISO trae el propio CD como repositorio; dentro del chroot no existe.
+{ grep -rlE 'cdrom|file:/' /etc/apt/sources.list.d/ 2>/dev/null || true; } | xargs -r rm -f
 cat >/etc/apt/sources.list.d/ubuntu.sources <<EOF
 Types: deb
 URIs: http://archive.ubuntu.com/ubuntu/
