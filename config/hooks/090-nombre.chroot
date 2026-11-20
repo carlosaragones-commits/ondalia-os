@@ -22,9 +22,9 @@ replace_file() {
 # --- Nombre del sistema ---
 # Se conserva la base de Ubuntu en ID_LIKE y UBUNTU_CODENAME para que los
 # programas que la comprueban (repositorios, drivers, Steam...) sigan funcionando.
-. /etc/os-release
-UBUNTU_VERSION_ID="$VERSION_ID"
-UBUNTU_CODE="${UBUNTU_CODENAME:-$VERSION_CODENAME}"
+# Se lee en una subshell: os-release define VERSION y pisaría la de Ondalia.
+UBUNTU_VERSION_ID=$(. /etc/os-release && echo "$VERSION_ID")
+UBUNTU_CODE=$(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
 
 log "Nombre del sistema: $DISTRO_NAME $VERSION"
 replace_file /usr/lib/os-release <<EOF
