@@ -8,6 +8,9 @@ Estados: **Hecho** (corregido en el código, entra en la próxima ISO), **Pendie
 | Fecha | Versión | Dónde | Problema | Estado |
 | --- | --- | --- | --- | --- |
 | 2026-11-20 | 0.1 | Arranque en vivo | Se queda en la consola `(initramfs)`: al regenerar el initrd se pierde la orden `boot=casper` | Hecho: se añade `boot=casper` al menú de arranque |
+| 2026-11-20 | 0.1 | Sistema | Se presenta como "Kubuntu 26.04" | Hecho: os-release, lsb-release e issue dicen "Ondalia OS 0.1" |
+| 2026-11-20 | 0.1 | Sesión en vivo | Sale la pantalla "Try or Install Kubuntu" | Hecho: se entra directo al escritorio con el icono "Instalar Ondalia OS" |
+| 2026-11-20 | 0.1 | Instalador | Diapositivas, enlaces y nombres de Kubuntu | Hecho: diapositivas propias de Ondalia y enlaces al proyecto |
 | 2026-11-20 | 0.1 | Menú de arranque (GRUB) | "gráficos básicos" se ve como "gr?ficos b?sicos": la fuente de GRUB no tiene tildes | Hecho: ahora dice "modo grafico seguro", sin tildes |
 | 2026-11-20 | 0.1 | Menú de arranque (GRUB) | La entrada "OEM install (for manufacturers)" sale en inglés | Hecho: "Instalacion OEM (para fabricantes)" |
 | 2026-11-20 | 0.1 | Menú de arranque (GRUB) | El texto de ayuda de abajo ("Use the ↑ and ↓ keys…") sale en inglés | Pendiente |
@@ -21,6 +24,8 @@ Estados: **Hecho** (corregido en el código, entra en la próxima ISO), **Pendie
 - [ ] Revisar todo lo que salga al probar la 0.1 en VirtualBox y en un PC real
 
 ## Más adelante
+
+- [ ] Pantalla propia de bienvenida en la sesión en vivo ("Probar" o "Instalar", elegir idioma), en lugar de entrar directamente al escritorio
 
 - [ ] Asistente de bienvenida: "¿Vienes de Windows o de Mac?", modo claro u oscuro, apps recomendadas, Steam
 - [ ] Lanzador de programas de Windows: doble clic en un .exe para abrirlo con Bottles

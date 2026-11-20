@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+# Que el sistema se presente como Ondalia OS y no como Kubuntu:
+# nombre del sistema, pantalla de bienvenida de la sesión en vivo e instalador.
+source /tmp/ondalia/hooks/lib.sh
+
+URL="${PROJECT_URL:-https://github.com/carlosaragones-commits/ondalia-os}"
+
+# Sustituye un archivo de un paquete de Kubuntu por el nuestro sin que una
+# actualización lo vuelva a pisar (el original queda como <archivo>.kubuntu).
+replace_file() {
+    local target=$1 tmp
+    tmp=$(mktemp)
+    cat >"$tmp"
+    if dpkg -S "$target" >/dev/null 2>&1 &&
+        ! dpkg-divert --list "$target" | grep -q ondalia-os; then
+        dpkg-divert --package ondalia-os --add --rename --divert "$target.kubuntu" "$target"
+    fi
+    install -D -m "${2:-0644}" "$tmp" "$target"
+    rm -f "$tmp"
+}
+
+# --- Nombre del sistema ---
+# Se conserva la base de Ubuntu en ID_LIKE y UBUNTU_CODENAME para que los
+# programas que la comprueban (repositorios, drivers, Steam...) sigan funcionando.
+. /etc/os-release
+UBUNTU_VERSION_ID="$VERSION_ID"
+UBUNTU_CODE="${UBUNTU_CODENAME:-$VERSION_CODENAME}"
+
+log "Nombre del sistema: $DISTRO_NAME $VERSION"
+replace_file /usr/lib/os-release <<EOF
+PRETTY_NAME="$DISTRO_NAME $VERSION"
+NAME="$DISTRO_NAME"
+VERSION="$VERSION ($CODENAME)"
+VERSION_ID="$UBUNTU_VERSION_ID"
+VERSION_CODENAME=$UBUNTU_CODE
+ID=$DISTRO_ID
+ID_LIKE="ubuntu debian"
+UBUNTU_CODENAME=$UBUNTU_CODE
+HOME_URL="$URL"
+SUPPORT_URL="$URL/issues"
+BUG_REPORT_URL="$URL/issues"
+LOGO=ondalia-logo
+EOF
+ln -sf ../usr/lib/os-release /etc/os-release
+
+replace_file /etc/lsb-release <<EOF
+DISTRIB_ID=Ondalia
+DISTRIB_RELEASE=$VERSION
+DISTRIB_CODENAME=$UBUNTU_CODE
+DISTRIB_DESCRIPTION="$DISTRO_NAME $VERSION"
+EOF
+
+replace_file /etc/issue <<EOF
+$DISTRO_NAME $VERSION \\n \\l
+
+EOF
+replace_file /etc/issue.net <<EOF
+$DISTRO_NAME $VERSION
+EOF
+
+# Icono "ondalia-logo" para quien lo pida por nombre (LOGO de os-release).
+install -D -m 0644 /usr/share/pixmaps/ondalia-logo.svg \
+    /usr/share/icons/hicolor/scalable/apps/ondalia-logo.svg
+
+# Nombre del equipo en la sesión en vivo.
+if [[ -f /etc/casper.conf ]]; then
+    sed -i -E -e 's/^(export )?HOST=.*/export HOST="ondalia"/' \
+        -e 's/^(export )?FLAVOUR=.*/export FLAVOUR="Ondalia"/' /etc/casper.conf
+fi
+
+# --- Sesión en vivo: sin la pantalla "Try or Install Kubuntu" ---
+# start-kubuntu-live-env ejecuta kubuntu-installer-prompt antes de abrir
+# Plasma. Lo sustituimos por un script que deja en el escritorio el icono
+# "Instalar Ondalia OS" y pasa directamente al escritorio.
+log "Sesión en vivo sin la pantalla de Kubuntu"
+replace_file /usr/bin/kubuntu-installer-prompt 0755 <<'EOF'
+#!/bin/sh
+# Ondalia OS: entra directamente al escritorio en vivo con el icono del instalador.
+grep -qw 'boot=casper' /proc/cmdline || exit 0
+xdg-user-dirs-update 2>/dev/null || true
+DESKTOP_DIR=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Escritorio")
+mkdir -p "$DESKTOP_DIR"
+cp /usr/share/applications/kubuntu-calamares.desktop "$DESKTOP_DIR/instalar-ondalia.desktop"
+chmod +x "$DESKTOP_DIR/instalar-ondalia.desktop"
+exit 0
+EOF
+
+# Lanzadores del instalador con el nombre de Ondalia, sin traducciones de Kubuntu.
+for f in /usr/share/applications/kubuntu-calamares.desktop /usr/share/applications/calamares-launch-oem.desktop; do
+    [[ -f $f ]] || continue
+    sed -i -E -e '/^(Name|GenericName|Comment)\[/d' "$f"
+    if [[ $f == *oem* ]]; then
+        sed -i -E 's/^Name=.*/Name=Preparar Ondalia OS para un cliente (OEM)/' "$f"
+    else
+        sed -i -E -e 's/^Name=.*/Name=Instalar Ondalia OS/' \
+            -e 's/^GenericName=.*/GenericName=Instalar Ondalia OS/' \
+            -e 's/^Comment=.*/Comment=Instala Ondalia OS en este ordenador/' "$f"
+    fi
+done
+
+# --- Instalador (Calamares): textos, enlaces y diapositivas ---
+B=/etc/calamares/branding/ondalia
+if [[ -d $B ]]; then
+    log "Diapositivas y enlaces del instalador"
+    rm -f "$B"/*.png
+    cp /usr/share/ondalia/instalador/*.png "$B/"
+    cp "$B/bienvenida.png" "$B/welcome.png"
+    cp "$B/bienvenida.png" "$B/welcome-oem.png"
+    cp /usr/share/pixmaps/ondalia-logo.png "$B/logo.png"
+    cp /usr/share/pixmaps/ondalia-logo.png "$B/icon.png"
+    cp /usr/share/pixmaps/ondalia-logo.png "$B/ondalia-logo.png"
+
+    {
+        echo 'import QtQuick 2.0;'
+        echo 'import calamares.slideshow 1.0;'
+        echo
+        echo 'Presentation {'
+        echo '    id: presentation'
+        echo '    Timer { interval: 12000; running: true; repeat: true; onTriggered: presentation.goToNextSlide() }'
+        for img in "$B"/diapositiva-*.png; do
+            cat <<EOF
+    Slide {
+        Image {
+            anchors.centerIn: parent
+            height: parent.masterHeight * 0.95
+            width: parent.masterWidth * 0.95
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            source: "$(basename "$img")"
+        }
+    }
+EOF
+        done
+        echo '}'
+    } >"$B/show.qml"
+
+    sed -i -E \
+        -e "s#^([[:space:]]+(productUrl|supportUrl|knownIssuesUrl|releaseNotesUrl):).*#\1 \"$URL\"#" \
+        -e '/^[[:space:]]+donateUrl:/d' \
+        "$B/branding.desc"
+fi
+
+C=/etc/calamares/modules
+[[ -f $C/welcome.conf ]] && sed -i -E 's|^showDonateUrl:.*|showDonateUrl: false|' "$C/welcome.conf"
+[[ -f $C/oemid.conf ]] && sed -i 's/kubuntu-[0-9]*/ondalia/' "$C/oemid.conf"
+[[ -f $C/partition.conf ]] && sed -i -e 's/"kubuntu_boot"/"ondalia_boot"/' -e 's/"kubuntu_[0-9]*"/"ondalia"/' "$C/partition.conf"
+true

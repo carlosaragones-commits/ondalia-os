@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" width="800" height="440">
+<defs><linearGradient id="f" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#001B3E"/><stop offset="1" stop-color="#004A7A"/></linearGradient></defs>
+<rect width="800" height="440" fill="url(#f)"/>
+<path d="M0,380 C200,350 300,410 500,385 C640,368 720,390 800,375 L800,440 L0,440 Z" fill="#00697A" opacity="0.6"/>
+<svg x="340" y="60" width="120" height="120" viewBox="0 0 256 256">
+  <title>Ondalia OS (claro sobre fondo oscuro)</title>
+  <defs>
+    <clipPath id="dentro"><circle cx="128" cy="128" r="94"/></clipPath>
+  </defs>
+  <circle cx="128" cy="128" r="104" fill="none" stroke="#E6F7FA" stroke-width="16"/>
+  <g clip-path="url(#dentro)">
+    <path fill="#4DD0E1" d="M20 170 C60 166 84 128 116 102 C146 78 188 74 210 100 C214 105 216 110 216 114 C200 98 172 98 156 116 C142 132 148 154 172 158 C188 161 204 156 220 148 L236 236 L20 236 Z"/>
+    <path fill="#E6F7FA" opacity="0.9" d="M20 196 C64 196 92 178 124 172 C160 166 196 180 236 170 L236 236 L20 236 Z"/>
+  </g>
+</svg>
+<text x="400" y="260" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="34"
+ font-weight="600" fill="#FFFFFF">Tus aplicaciones, a un clic</text>
+<text x="400" y="330" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="20" fill="#CFE7EE">Abre Discover, la tienda de aplicaciones,</text><text x="400" y="360" text-anchor="middle" font-family="Inter, DejaVu Sans, sans-serif" font-size="20" fill="#CFE7EE">y encontrarás miles de programas gratuitos.</text>
+</svg>

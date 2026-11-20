@@ -120,6 +120,14 @@ render_branding() {
     install -m 0644 branding/logo.svg "$pix/ondalia-logo.svg"
     install -m 0644 branding/logo-mono-light.svg "$pix/ondalia-logo-symbolic.svg"
     rsvg-convert -w 512 -h 512 branding/logo.svg -o "$pix/ondalia-logo.png"
+
+    # Diapositivas del instalador
+    local inst="$OVERLAY/usr/share/ondalia/instalador" svg
+    mkdir -p "$inst"
+    for svg in branding/instalador/diapositiva-*.svg; do
+        rsvg-convert -w 800 -h 440 "$svg" -o "$inst/$(basename "${svg%.svg}").png"
+    done
+    rsvg-convert -w 400 -h 400 branding/logo.svg -o "$inst/bienvenida.png"
 }
 
 prepare_chroot() {
@@ -164,7 +172,7 @@ customize() {
             PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
             LANG=C.UTF-8 \
             DISTRO_NAME="$DISTRO_NAME" DISTRO_ID="$DISTRO_ID" \
-            VERSION="$VERSION" CODENAME="$CODENAME" \
+            VERSION="$VERSION" CODENAME="$CODENAME" PROJECT_URL="$PROJECT_URL" \
             DEFAULT_LOCALE="$DEFAULT_LOCALE" DEFAULT_KEYMAP="$DEFAULT_KEYMAP" \
             DEFAULT_TIMEZONE="$DEFAULT_TIMEZONE" \
             AUTOFIRMA_REQUIRED="${AUTOFIRMA_REQUIRED:-0}" \
