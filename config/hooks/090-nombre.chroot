@@ -82,6 +82,10 @@ DESKTOP_DIR=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Escritorio")
 mkdir -p "$DESKTOP_DIR"
 cp /usr/share/applications/kubuntu-calamares.desktop "$DESKTOP_DIR/instalar-ondalia.desktop"
 chmod +x "$DESKTOP_DIR/instalar-ondalia.desktop"
+# Igual que el original: al terminar cierra el kwin provisional para que
+# start-kubuntu-live-env pueda arrancar Plasma. Sin esto queda la pantalla
+# en negro con el puntero.
+/usr/bin/killall kwin_wayland 2>/dev/null || pkill -x kwin_wayland
 exit 0
 EOF
 

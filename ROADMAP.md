@@ -7,7 +7,7 @@ Estados: **Hecho** (corregido en el código, entra en la próxima ISO), **Pendie
 
 | Fecha | Versión | Dónde | Problema | Estado |
 | --- | --- | --- | --- | --- |
-| 2026-11-20 | 0.1 (compilación 44700436087) | Sesión en vivo | Tras la pantalla de arranque queda una pantalla negra con el puntero y no llega al escritorio. Sospechas: el cambio que salta la pantalla de Kubuntu o el estilo Klassy | Pendiente |
+| 2026-11-20 | 0.1 (compilación 44700436087) | Sesión en vivo | Tras la pantalla de arranque queda una pantalla negra con el puntero y no llega al escritorio. Causa: el sustituto de la pantalla de Kubuntu no cerraba el kwin provisional | Hecho: ahora lo cierra, como hacía el original |
 | 2026-11-20 | 0.1 | Arranque en vivo | Se queda en la consola `(initramfs)`: al regenerar el initrd se pierde la orden `boot=casper` | Hecho: se añade `boot=casper` al menú de arranque |
 | 2026-11-20 | 0.1 | Sistema | Se presenta como "Kubuntu 26.04" | Hecho: os-release, lsb-release e issue dicen "Ondalia OS 0.1" |
 | 2026-11-20 | 0.1 | Sesión en vivo | Sale la pantalla "Try or Install Kubuntu" | Hecho: se entra directo al escritorio con el icono "Instalar Ondalia OS" |
