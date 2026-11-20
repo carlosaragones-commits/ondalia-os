@@ -7,6 +7,7 @@ Estados: **Hecho** (corregido en el código, entra en la próxima ISO), **Pendie
 
 | Fecha | Versión | Dónde | Problema | Estado |
 | --- | --- | --- | --- | --- |
+| 2026-11-20 | 0.1 | Arranque en vivo | Se queda en la consola `(initramfs)`: al regenerar el initrd se pierde la orden `boot=casper` | Hecho: se añade `boot=casper` al menú de arranque |
 | 2026-11-20 | 0.1 | Menú de arranque (GRUB) | "gráficos básicos" se ve como "gr?ficos b?sicos": la fuente de GRUB no tiene tildes | Hecho: ahora dice "modo grafico seguro", sin tildes |
 | 2026-11-20 | 0.1 | Menú de arranque (GRUB) | La entrada "OEM install (for manufacturers)" sale en inglés | Hecho: "Instalacion OEM (para fabricantes)" |
 | 2026-11-20 | 0.1 | Menú de arranque (GRUB) | El texto de ayuda de abajo ("Use the ↑ and ↓ keys…") sale en inglés | Pendiente |

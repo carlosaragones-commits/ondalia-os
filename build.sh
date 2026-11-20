@@ -199,6 +199,8 @@ update_boot_files() {
 
     # Menú de arranque en español y con el nombre de Ondalia.
     # Sin tildes ni eñes: la fuente de GRUB las muestra como "?".
+    # boot=casper: el initrd original de Kubuntu lo trae dentro, pero el que
+    # se regenera en el chroot no, y sin él no arranca la sesión en vivo.
     local cfg
     for cfg in "$ISO_DIR/boot/grub/grub.cfg" "$ISO_DIR/boot/grub/loopback.cfg"; do
         [[ -f $cfg ]] || continue
@@ -208,6 +210,7 @@ update_boot_files() {
             -e "s/safe graphics/modo grafico seguro/g" \
             -e "s/OEM install (for manufacturers)/Instalacion OEM (para fabricantes)/g" \
             -e "/linux.*casper/ s|---| locale=$DEFAULT_LOCALE keyboard-configuration/layoutcode=$DEFAULT_KEYMAP ---|" \
+            -e "/linux.*casper/ { /boot=casper/! s|\(/casper/[^ ]*vmlinuz\)|\1 boot=casper| }" \
             "$cfg"
     done
 
