@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Aspecto moderno: iconos Papirus con carpetas en verde azulado, estilo de
+# ventanas Klassy (redondeado) y LibreOffice con pestañas e iconos Colibre.
+source /tmp/ondalia/hooks/lib.sh
+
+LNF=/usr/share/plasma/look-and-feel
+
+# --- Iconos: Papirus con carpetas del color de Ondalia ---
+install_available papirus-icon-theme
+if [[ -d /usr/share/icons/Papirus ]]; then
+    log "Carpetas de Papirus en verde azulado"
+    if wget -nv -O /usr/local/bin/papirus-folders \
+        https://raw.githubusercontent.com/PapirusDevelopmentTeam/papirus-folders/master/papirus-folders; then
+        chmod 0755 /usr/local/bin/papirus-folders
+        papirus-folders -C teal --theme Papirus || warn "No se pudo cambiar el color de las carpetas"
+        papirus-folders -C teal --theme Papirus-Dark || true
+        rm -f /usr/local/bin/papirus-folders
+    else
+        warn "No se pudo descargar papirus-folders; las carpetas quedan en azul"
+    fi
+    sed -i 's/^Theme=.*/Theme=Papirus/' /etc/xdg/kdeglobals "$LNF/org.ondalia.desktop/contents/defaults"
+    sed -i 's/^Theme=.*/Theme=Papirus-Dark/' "$LNF/org.ondalia.oscuro.desktop/contents/defaults"
+fi
+
+# --- Estilo de ventanas y aplicaciones: Klassy (se compila desde su código) ---
+# Si la compilación falla, Ondalia se queda con Breeze y la ISO se genera igual.
+KLASSY_BUILD_DEPS=(
+    git build-essential cmake extra-cmake-modules gettext
+    qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-tools-dev
+    libkdecorations3-dev libkf6config-dev libkf6configwidgets-dev libkf6coreaddons-dev
+    libkf6guiaddons-dev libkf6i18n-dev libkf6iconthemes-dev libkf6kcmutils-dev
+    libkf6windowsystem-dev libkf6colorscheme-dev libkf6kirigami-dev libkf6package-dev
+    libkf6style-dev libkf6service-dev libkf6frameworkintegration-dev
+)
+build_klassy() {
+    local src=/tmp/klassy
+    install_available "${KLASSY_BUILD_DEPS[@]}" || return 1
+    rm -rf "$src"
+    git clone --depth 1 https://github.com/paulmcauley/klassy.git "$src" || return 1
+    cmake -S "$src" -B "$src/build" -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_TESTING=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON -DBUILD_QT5=OFF -DBUILD_QT6=ON || return 1
+    cmake --build "$src/build" -j"$(nproc)" || return 1
+    cmake --install "$src/build" || return 1
+    rm -rf "$src"
+}
+
+log "Compilando Klassy"
+apt-mark showmanual >/tmp/ondalia-manual-antes
+if build_klassy; then
+    log "Klassy instalado: estilo redondeado por defecto"
+    sed -i 's/^widgetStyle=.*/widgetStyle=Klassy/' "$LNF"/org.ondalia*.desktop/contents/defaults
+    sed -i -e 's/^library=org.kde.breeze$/library=org.kde.klassy/' -e 's/^theme=Breeze$/theme=Klassy/' \
+        "$LNF"/org.ondalia*.desktop/contents/defaults
+    sed -i '/^\[KDE\]/a widgetStyle=Klassy' /etc/xdg/kdeglobals
+    cat >>/etc/xdg/kwinrc <<'EOF'
+
+[org.kde.kdecoration2]
+library=org.kde.klassy
+theme=Klassy
+EOF
+else
+    warn "No se pudo compilar Klassy; se mantiene el estilo Breeze"
+fi
+# Quitar las herramientas de compilación que no estaban antes.
+mapfile -t NEW_PKGS < <(comm -13 <(sort /tmp/ondalia-manual-antes) <(apt-mark showmanual | sort))
+if ((${#NEW_PKGS[@]})); then
+    apt-mark auto "${NEW_PKGS[@]}" >/dev/null
+    apt_get autoremove --purge
+fi
+rm -f /tmp/ondalia-manual-antes
+
+# --- LibreOffice: pestañas tipo cinta, iconos Colibre e integración con Plasma ---
+install_available libreoffice-style-colibre libreoffice-kf6
+if [[ -d /usr/lib/libreoffice/share/registry ]]; then
+    log "LibreOffice con pestañas e iconos Colibre"
+    cat >/usr/lib/libreoffice/share/registry/ondalia.xcd <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<oor:data xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:oor="http://openoffice.org/2001/registry">
+  <dependency file="main"/>
+  <oor:component-data oor:name="Common" oor:package="org.openoffice.Office">
+    <node oor:name="Misc">
+      <prop oor:name="SymbolStyle" oor:op="fuse"><value>colibre</value></prop>
+    </node>
+  </oor:component-data>
+  <oor:component-data oor:name="ToolbarMode" oor:package="org.openoffice.Office.UI">
+    <prop oor:name="ActiveWriter" oor:op="fuse"><value>notebookbar.ui</value></prop>
+    <prop oor:name="ActiveCalc" oor:op="fuse"><value>notebookbar.ui</value></prop>
+    <prop oor:name="ActiveImpress" oor:op="fuse"><value>notebookbar.ui</value></prop>
+    <prop oor:name="ActiveDraw" oor:op="fuse"><value>notebookbar.ui</value></prop>
+  </oor:component-data>
+</oor:data>
+EOF
+fi
+
+# --- Dolphin: más limpio por defecto ---
+cat >/etc/xdg/dolphinrc <<'EOF'
+[General]
+BrowseThroughArchives=true
+ShowFullPathInTitlebar=false
+ShowStatusBar=true
+
+[MainWindow]
+MenuBar=Disabled
+
+[IconsMode]
+IconSize=64
+PreviewSize=64
+EOF
