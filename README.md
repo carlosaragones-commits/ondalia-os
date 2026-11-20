@@ -75,13 +75,6 @@ tools/                          Generadores de fondos y esquemas de color
 
 Para añadir o quitar programas basta con editar las dos listas de `config/packages/`.
 
-## Próximos pasos
+## Hoja de ruta
 
-- Asistente de bienvenida ("¿Vienes de Windows o de Mac?", modo claro u oscuro, apps recomendadas, Steam)
-- Lanzador de programas de Windows: doble clic en un .exe para abrirlo con Bottles
-- Importador de certificados .p12/.pfx para Firefox y AutoFirma
-- Centro de ayuda sin conexión, con guía de trámites online
-- Estilo de Plasma propio: la muesca ondulada de la barra superior y etiquetas bajo los iconos del dock
-- Volver a una instantánea desde el menú de arranque (grub-btrfs)
-- Empaquetar los ajustes de Ondalia como paquete .deb propio, para que se actualicen con el sistema
-- Elegir licencia del proyecto (sugerencia: GPL-3.0-or-later para el código y CC BY-SA 4.0 para el arte)
+Los fallos encontrados al probar y lo que queda por hacer están en [ROADMAP.md](ROADMAP.md).

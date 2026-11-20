@@ -198,13 +198,15 @@ update_boot_files() {
     cp "$CHROOT/boot/initrd.img-$kver" "$ISO_DIR/casper/initrd"
 
     # Menú de arranque en español y con el nombre de Ondalia.
+    # Sin tildes ni eñes: la fuente de GRUB las muestra como "?".
     local cfg
     for cfg in "$ISO_DIR/boot/grub/grub.cfg" "$ISO_DIR/boot/grub/loopback.cfg"; do
         [[ -f $cfg ]] || continue
         sed -i \
             -e "s/Try or Install Kubuntu/Probar o instalar $DISTRO_NAME/g" \
             -e "s/Kubuntu/$DISTRO_NAME/g" \
-            -e "s/safe graphics/gráficos básicos/g" \
+            -e "s/safe graphics/modo grafico seguro/g" \
+            -e "s/OEM install (for manufacturers)/Instalacion OEM (para fabricantes)/g" \
             -e "/linux.*casper/ s|---| locale=$DEFAULT_LOCALE keyboard-configuration/layoutcode=$DEFAULT_KEYMAP ---|" \
             "$cfg"
     done
