@@ -18,6 +18,8 @@ Estados: **Hecho** (corregido en el código, entra en la próxima ISO), **Pendie
 
 ## Próxima versión (0.2)
 
+- [ ] Aspecto más moderno de Dolphin y del sistema: tema de iconos actual (candidatos: Papirus, Tela, Colloid) y estilo de aplicaciones más redondeado (candidatos: Klassy, Darkly)
+- [ ] LibreOffice con aspecto moderno: interfaz con pestañas (tipo cinta de Office), iconos actuales e integración con el tema de Plasma
 - [ ] Menú de arranque con aspecto de Ondalia: fondo azul, logo y tipografía con tildes (tema de GRUB)
 - [ ] Texto de ayuda del menú de arranque en español
 - [ ] Elegir siempre la versión más reciente de AutoFirma
