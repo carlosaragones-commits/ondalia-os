@@ -18,6 +18,7 @@ Estados: **Hecho** (corregido en el código, entra en la próxima ISO), **Pendie
 
 ## Próxima versión (0.2)
 
+- [ ] Barra superior y dock algo translúcidos, con desenfoque del fondo
 - [x] Aspecto más moderno de Dolphin y del sistema: iconos Papirus con carpetas en verde azulado y estilo Klassy (pendiente de probar)
 - [x] LibreOffice con pestañas tipo cinta, iconos Colibre e integración con Plasma (pendiente de probar)
 - [ ] Menú de arranque con aspecto de Ondalia: fondo azul, logo y tipografía con tildes (tema de GRUB)
